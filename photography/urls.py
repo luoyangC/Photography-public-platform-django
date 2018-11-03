@@ -1,21 +1,50 @@
-"""photography URL Configuration
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/2.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path
+    photography URL Configuration
+"""
+import xadmin
+from django.urls import path, include
+from django.views.generic import RedirectView
+from rest_framework.routers import DefaultRouter
+from rest_framework.documentation import include_docs_urls
+
+from user import views as user_views
+from content import views as content_views
+from operate import views as operate_views
+
+router = DefaultRouter()
+
+# 用户接口
+router.register('user', user_views.UserViewSet, base_name='user')
+# 邮件接口
+router.register('code', user_views.EmailVerifyRecordViewSet, base_name='code')
+# 地址接口
+router.register('address', user_views.AddressViewSet, base_name='address')
+# 主题接口
+router.register('topic', content_views.TopicViewSet, base_name='topic')
+# 动态接口
+router.register('activity', content_views.ActivityViewSet, base_name='activity')
+# 约拍接口
+router.register('agreement', content_views.AgreementViewSet, base_name='agreement')
+# 收藏接口
+router.register('keep', operate_views.KeepViewSet, base_name='keep')
+# 关注接口
+router.register('follow', operate_views.FollowViewSet, base_name='follow')
+# 点赞接口
+router.register('like', operate_views.LikeViewSet, base_name='like')
+# 评论接口
+router.register('comment', operate_views.CommentViewSet, base_name='comment')
+# 回复接口
+router.register('reply', operate_views.ReplyViewSet, base_name='reply')
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # 主页地址（暂设为跳转到API根入口）
+    path('', RedirectView.as_view(url='api/')),
+    # 后台管理入口
+    path('admin/', xadmin.site.urls),
+    # DRF登录入口
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    # DRF文档入口
+    path('docs/', include_docs_urls(title='文档')),
+    # API根入口
+    path('api/', include(router.urls)),
 ]

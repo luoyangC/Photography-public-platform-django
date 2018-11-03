@@ -1,10 +1,28 @@
 [[source]]
-url = "https://pypi.org/simple"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 verify_ssl = true
 name = "pypi"
 
 [packages]
 django = "==2.0"
+django-crispy-forms = "*"
+django-filter = "*"
+django-guardian = "*"
+django-reversion = "*"
+django-formtools = "*"
+xlwt = "*"
+xlsxwriter = "*"
+django-import-export = "*"
+future = "*"
+httplib2 = "*"
+pillow = "*"
+django-mdeditor = "*"
+djangorestframework = "*"
+coreapi = "*"
+djangorestframework-jwt = "*"
+django-cors-headers = "*"
+drf-extensions = "*"
+django-redis = "*"
 
 [dev-packages]
 
