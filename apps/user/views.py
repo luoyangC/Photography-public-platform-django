@@ -1,4 +1,6 @@
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, viewsets, permissions
+from rest_framework.authentication import SessionAuthentication
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from user.models import UserProfile, EmailVerifyRecord, Address
 from user.serializers import UserCreateSerializer, EmailVerifySerializer, AddressSerializer
@@ -8,8 +10,10 @@ from user.serializers import UserCreateSerializer, EmailVerifySerializer, Addres
 
 class UserViewSet(viewsets.ModelViewSet):
 
+    permission_classes = (permissions.IsAuthenticated, )
     queryset = UserProfile.objects.all()
     serializer_class = UserCreateSerializer
+    authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
 
 
 class EmailVerifyRecordViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):

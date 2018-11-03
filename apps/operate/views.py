@@ -9,29 +9,29 @@ from operate.serializers import CommentSerializer, ReplySerializer
 
 class KeepViewSet(viewsets.ModelViewSet):
 
-    queryset = Keep
+    queryset = Keep.objects.all()
     serializer_class = KeepSerializer
 
 
 class FollowViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 
-    queryset = Follow
+    queryset = Follow.objects.all()
     serializer_class = FollowSerializer
 
 
 class LikeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
 
-    queryset = Like
+    queryset = Like.objects.all()
     serializer_class = LikeSerializer
 
 
 class CommentViewSet(viewsets.ModelViewSet):
 
-    queryset = Comment
+    queryset = Comment.objects.all()
     serializer_class = CommentSerializer
 
 
 class ReplyViewSet(viewsets.ModelViewSet):
 
-    queryset = Reply
+    queryset = Reply.objects.all()
     serializer_class = ReplySerializer

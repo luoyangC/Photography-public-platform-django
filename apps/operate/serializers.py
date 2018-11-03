@@ -40,5 +40,5 @@ class CommentSerializer(serializers.ModelSerializer):
 class ReplySerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Comment
+        model = Reply
         exclude = ('status', 'create_time')
