@@ -1,18 +1,29 @@
-from rest_framework import mixins, viewsets, permissions
+from rest_framework import mixins, viewsets, permissions, status
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_jwt.settings import api_settings
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from user.models import UserProfile, EmailVerifyRecord, Address
-from user.serializers import UserCreateSerializer, EmailVerifySerializer, AddressSerializer
+from user.serializers import UserCreateSerializer, UserDetailSerializer, EmailVerifySerializer, AddressSerializer
+from utils.weixin_create import get_weixin_user_info
 
 # Create your views here.
 
 
 class UserViewSet(viewsets.ModelViewSet):
 
-    permission_classes = (permissions.IsAuthenticated, )
     queryset = UserProfile.objects.all()
     serializer_class = UserCreateSerializer
+
+    # 动态配置Serializer
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return UserCreateSerializer
+        return UserDetailSerializer
+
+    permission_classes = (permissions.IsAuthenticated, )
     authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
 
 
@@ -26,3 +37,32 @@ class AddressViewSet(viewsets.ModelViewSet):
 
     queryset = Address.objects.all()
     serializer_class = AddressSerializer
+
+
+class WeiXinView(APIView):
+    """
+    微信授权接口
+    """
+    def post(self, request):
+        # 获取用户信息
+        data = get_weixin_user_info(request.data)
+        user = UserProfile.objects.filter(username=data['username']).first()
+
+        # 判断用户是否存在，若不存在则创建用户
+        if not user:
+            user = UserProfile.objects.create(**data)
+
+        # 生成用户token，返回给前端
+        token = self.create_token(user)
+        serializer = UserDetailSerializer(user)
+        data = serializer.data
+        return Response({'token': token, 'userInfo': data}, status=status.HTTP_200_OK)
+
+    @staticmethod
+    def create_token(user):
+        # 生成用户token
+        jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+        jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+        payload = jwt_payload_handler(user)
+        token = jwt_encode_handler(payload)
+        return token

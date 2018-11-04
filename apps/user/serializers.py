@@ -19,6 +19,13 @@ class UserCreateSerializer(serializers.ModelSerializer):
         fields = ('username', 'email')
 
 
+class UserDetailSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UserProfile
+        fields = ('nick_name', 'birthday', 'gender', 'approve', 'email', 'mobile', 'image')
+
+
 class EmailVerifySerializer(serializers.ModelSerializer):
 
     class Meta:

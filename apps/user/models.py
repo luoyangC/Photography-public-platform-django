@@ -11,9 +11,9 @@ class UserProfile(AbstractUser, Base):
     用户信息
     """
     GENDER_TYPE = (
-        ('male', '男'),
-        ('female', '女'),
-        ('unknown', '未知'),
+        (1, '男'),
+        (2, '女'),
+        (0, '未知'),
     )
     USER_TYPE = (
         ('photographer', '摄影师'),
@@ -22,12 +22,11 @@ class UserProfile(AbstractUser, Base):
     )
     nick_name = models.CharField(max_length=10, null=True, blank=True, verbose_name='昵称')
     birthday = models.DateField(null=True, blank=True, verbose_name='出生日期')
-    gender = models.CharField(max_length=8, choices=GENDER_TYPE, default='unknown', verbose_name='性别')
+    gender = models.SmallIntegerField(choices=GENDER_TYPE, default=0, verbose_name='性别')
     approve = models.CharField(max_length=12, choices=USER_TYPE, default='general', verbose_name='认证类型')
     mobile = models.CharField(max_length=11, null=True, blank=True, verbose_name='电话')
     email = models.EmailField(max_length=100, null=True, blank=True, verbose_name='邮箱')
-    image = models.ImageField(max_length=100, upload_to='image/user/%Y/%m',
-                              default='image/user/default/1.png', verbose_name='头像')
+    image = models.URLField(max_length=200, verbose_name='头像')
 
     class Meta:
         verbose_name = '用户'

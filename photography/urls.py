@@ -57,6 +57,8 @@ urlpatterns = [
     path('docs/', include_docs_urls(title='文档')),
     # 获取授权
     path('api/login/', obtain_jwt_token),
+    # 微信授权
+    path('api/weixin/', user_views.WeiXinView.as_view(), name='weixin'),
     # API入口
     path('api/', include(router.urls)),
 ]
