@@ -19,8 +19,8 @@ def get_weixin_user_info(data):
 
     # 获取前端传递过来的三个关键的值
     code = data['code']
-    iv = data['detail']['iv']
-    encrypted_data = data['detail']['encryptedData']
+    iv = data['iv']
+    encrypted_data = data['encryptedData']
 
     # 用配置文件中的配置生成API接口
     api = WXAPPAPI(appid=APP_ID, app_secret=APP_SECRET)
