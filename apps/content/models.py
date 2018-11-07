@@ -12,7 +12,6 @@ class Content(Base):
     """
     content = models.TextField(verbose_name='内容')
     update_time = models.DateTimeField(auto_now_add=True, verbose_name='更新时间')
-    like_nums = models.IntegerField(default=0, verbose_name='点赞数')
     comment_nums = models.IntegerField(default=0, verbose_name='评论数')
 
     class Meta:
@@ -50,6 +49,21 @@ class Photo(Base):
         return self.activity.content
 
 
+class Sample(Base):
+    """
+    样张
+    """
+    image = models.ImageField(max_length=100, upload_to='image/content/%Y/%m', verbose_name='样张')
+    agreement = models.ForeignKey('Agreement', on_delete=models.CASCADE, related_name='images', verbose_name='样张')
+
+    class Meta:
+        verbose_name = '样张'
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return self.agreement.content
+
+
 class Activity(Content):
     """
     动态
@@ -60,6 +74,7 @@ class Activity(Content):
     )
     keep_nums = models.IntegerField(default=0, verbose_name='收藏数')
     share_nums = models.IntegerField(default=0, verbose_name='分享数')
+    like_nums = models.IntegerField(default=0, verbose_name='点赞数')
     activity_type = models.CharField(max_length=10, choices=ACTIVITY_TYPE, verbose_name='动态类型')
 
     user = models.ForeignKey(UserProfile, related_name='contents', on_delete=models.CASCADE, verbose_name='作者')
@@ -87,6 +102,7 @@ class Agreement(Content):
     )
     agreement_type = models.CharField(max_length=5, choices=AGREEMENT_TYPE, verbose_name='约拍类型')
     amount = models.FloatField(default=0, verbose_name='金额')
+    tags = models.CharField(max_length=100, null=True, blank=True, verbose_name='标签')
 
     user = models.ForeignKey(UserProfile, related_name='agreements', on_delete=models.CASCADE, verbose_name='作者')
     address = models.ForeignKey(Address, related_name='agreements', on_delete=models.CASCADE, verbose_name='地址')

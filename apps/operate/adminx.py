@@ -3,7 +3,7 @@
 """
 import xadmin
 
-from operate.models import Keep, Follow, Like, Comment, Reply
+from operate.models import Keep, Follow, Like, Comment, Reply, Send
 
 __author__ = '骆杨'
 
@@ -28,8 +28,13 @@ class ReplyAdmin(object):
     pass
 
 
+class SendAdmin(object):
+    pass
+
+
 xadmin.site.register(Keep, KeepAdmin)
 xadmin.site.register(Follow, FollowAdmin)
 xadmin.site.register(Like, LikeAdmin)
 xadmin.site.register(Comment, CommentAdmin)
 xadmin.site.register(Reply, ReplyAdmin)
+xadmin.site.register(Send, SendAdmin)

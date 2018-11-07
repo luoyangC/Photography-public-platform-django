@@ -87,15 +87,7 @@ class Like(Base):
     """
     用户点赞
     """
-    LIKE_TYPE = (
-        ('activity', '动态'),
-        ('agreement', '约拍'),
-        ('comment', '评论'),
-        ('reply', '回复')
-    )
-    like_type = models.CharField(max_length=10, choices=LIKE_TYPE, verbose_name='点赞类型')
-    like_id = models.IntegerField(verbose_name='被点赞的id')
-
+    activity = models.ForeignKey(Activity, related_name='likes', on_delete=models.CASCADE, verbose_name='动态')
     user = models.ForeignKey(UserProfile, related_name='likes', on_delete=models.CASCADE, verbose_name='用户')
 
     class Meta:
@@ -103,4 +95,22 @@ class Like(Base):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return str(self.like_id)
+        return str(self.activity.id)
+
+
+class Send(Base):
+    """
+    发起约拍
+    """
+    content = models.TextField(verbose_name='内容')
+    answer = models.BooleanField(default=False, verbose_name='回答')
+
+    agreement = models.ForeignKey(Agreement, related_name='sends', on_delete=models.CASCADE, verbose_name='约拍')
+    user = models.ForeignKey(UserProfile, related_name='sends', on_delete=models.CASCADE, verbose_name='用户')
+
+    class Meta:
+        verbose_name = '发起'
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return self.content

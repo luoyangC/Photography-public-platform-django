@@ -18,7 +18,6 @@ class ActivityViewSet(viewsets.ModelViewSet):
 
     queryset = Activity.objects.all()
     serializer_class = ActivitySerializers
-    permission_classes = (permissions.IsAuthenticated, )
     authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
 
 
