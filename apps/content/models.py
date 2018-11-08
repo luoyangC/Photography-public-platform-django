@@ -12,7 +12,6 @@ class Content(Base):
     """
     content = models.TextField(verbose_name='内容')
     update_time = models.DateTimeField(auto_now_add=True, verbose_name='更新时间')
-    comment_nums = models.IntegerField(default=0, verbose_name='评论数')
 
     class Meta:
         abstract = True
@@ -72,9 +71,6 @@ class Activity(Content):
         ('original', '原创'),
         ('forward', '转载'),
     )
-    keep_nums = models.IntegerField(default=0, verbose_name='收藏数')
-    share_nums = models.IntegerField(default=0, verbose_name='分享数')
-    like_nums = models.IntegerField(default=0, verbose_name='点赞数')
     activity_type = models.CharField(max_length=10, choices=ACTIVITY_TYPE, verbose_name='动态类型')
 
     user = models.ForeignKey(UserProfile, related_name='contents', on_delete=models.CASCADE, verbose_name='作者')
@@ -89,6 +85,12 @@ class Activity(Content):
 
     def __str__(self):
         return self.content
+
+    def get_original(self):
+        if self.activity_type == 'original':
+            return self
+        else:
+            return self.source_link.get_original()
 
 
 class Agreement(Content):

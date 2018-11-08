@@ -19,7 +19,7 @@ class Keep(Base):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return self.activity
+        return self.user.nick_name
 
 
 class Follow(Base):
@@ -33,14 +33,14 @@ class Follow(Base):
     follow_type = models.CharField(max_length=10, choices=FOLLOW_TYPE, verbose_name='关注类型')
     follow_id = models.IntegerField(verbose_name='关注id')
 
-    user = models.OneToOneField(UserProfile, related_name='follows', on_delete=models.CASCADE, verbose_name='用户')
+    user = models.ForeignKey(UserProfile, related_name='follows', on_delete=models.CASCADE, verbose_name='用户')
 
     class Meta:
         verbose_name = '关注'
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return str(self.follow_id)
+        return self.user.nick_name
 
 
 class Comment(Base):
@@ -48,7 +48,6 @@ class Comment(Base):
     用户评论
     """
     content = models.TextField(verbose_name='评论内容')
-    like_nums = models.IntegerField(default=0, verbose_name='点赞数')
 
     agreement = models.ForeignKey(Agreement, null=True, blank=True, related_name='comments',
                                   on_delete=models.SET_NULL, verbose_name='评论的约拍')
@@ -70,7 +69,6 @@ class Reply(Base):
     """
     to_user_id = models.IntegerField(null=False, blank=False, verbose_name='接收者')
     content = models.TextField(verbose_name='回复内容')
-    like_nums = models.IntegerField(default=0, verbose_name='点赞数')
 
     from_user = models.ForeignKey(UserProfile, related_name='replies', on_delete=models.CASCADE, verbose_name='发送者')
     comment = models.ForeignKey(Comment, related_name='replies', on_delete=models.CASCADE, verbose_name='评论')
@@ -95,7 +93,7 @@ class Like(Base):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return str(self.activity.id)
+        return self.user.nick_name
 
 
 class Send(Base):
