@@ -3,6 +3,7 @@
 
 .gitignore
 .idea
+media
 photography/settings.py
 Pipfile.lock
 db.sqlite3
