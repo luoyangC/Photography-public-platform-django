@@ -1,37 +1,74 @@
-from rest_framework import mixins, viewsets
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import mixins, viewsets, permissions
+from rest_framework.authentication import SessionAuthentication
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from operate.models import Keep, Follow, Like, Comment, Reply
 from operate.serializers import KeepSerializer, FollowSerializer, LikeSerializer
 from operate.serializers import CommentSerializer, ReplySerializer
 
 # Create your views here.
+from utils.permissions import IsOwnerOrReadOnly
 
 
-class KeepViewSet(viewsets.ModelViewSet):
+class MyViewSet(mixins.CreateModelMixin,
+                mixins.RetrieveModelMixin,
+                mixins.DestroyModelMixin,
+                mixins.ListModelMixin,
+                viewsets.GenericViewSet):
+    """
+    不提供Update方法
+    """
+    pass
+
+
+class KeepViewSet(MyViewSet):
 
     queryset = Keep.objects.all()
     serializer_class = KeepSerializer
 
 
-class FollowViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class FollowViewSet(MyViewSet):
 
-    queryset = Follow.objects.all()
+    queryset = Follow.objects.all().order_by('-create_time')
     serializer_class = FollowSerializer
+    filter_backends = (DjangoFilterBackend, )
+    filter_fields = ('user', 'follow_type')
 
 
 class LikeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
 
+    permissions = IsOwnerOrReadOnly
     queryset = Like.objects.all()
     serializer_class = LikeSerializer
+    authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
 
 
-class CommentViewSet(viewsets.ModelViewSet):
+class CommentViewSet(MyViewSet):
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return [permissions.IsAuthenticated()]
+        return [IsOwnerOrReadOnly()]
 
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+    authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
-class ReplyViewSet(viewsets.ModelViewSet):
+class ReplyViewSet(MyViewSet):
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return [permissions.IsAuthenticated()]
+        return [IsOwnerOrReadOnly()]
 
     queryset = Reply.objects.all()
     serializer_class = ReplySerializer
+    authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
+
+    def perform_create(self, serializer):
+        serializer.save(from_user=self.request.user)

@@ -7,6 +7,7 @@ from rest_framework import serializers
 from content.models import Topic, Activity, Agreement, Photo, Sample
 from user.serializers import UserDetailSerializer, AddressSerializer
 from operate.serializers import CommentSerializer
+from operate.models import Like, Keep
 
 __author__ = '骆杨'
 
@@ -40,6 +41,10 @@ class ActivitySerializers(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     source = serializers.SerializerMethodField()
     is_author = serializers.SerializerMethodField()
+    is_like = serializers.SerializerMethodField()
+    is_comment = serializers.SerializerMethodField()
+    is_keep = serializers.SerializerMethodField()
+    is_share = serializers.SerializerMethodField()
     keep_nums = serializers.SerializerMethodField()
     comment_nums = serializers.SerializerMethodField()
     like_nums = serializers.SerializerMethodField()
@@ -49,8 +54,13 @@ class ActivitySerializers(serializers.ModelSerializer):
 
     @staticmethod
     def get_comment_nums(obj):
-        comment_nums = obj.comments.count()
-        return comment_nums
+        comments = obj.comments.all()
+        if comments:
+            comment_nums = obj.comments.count()
+            for i in comments:
+                comment_nums += i.get_reply_nums()
+            return comment_nums
+        return 0
 
     @staticmethod
     def get_like_nums(obj):
@@ -86,8 +96,46 @@ class ActivitySerializers(serializers.ModelSerializer):
 
     def get_is_author(self, obj):
         user = self.context['request'].user
-        if user == obj.user:
-            return True
+        if isinstance(user, User):
+            if user == obj.user:
+                return True
+        return False
+
+    def get_is_like(self, obj):
+        user = self.context['request'].user
+        if isinstance(user, User):
+            like = Like.objects.filter(user=user, activity=obj).first()
+            if like:
+                return True
+        return False
+
+    def get_is_keep(self, obj):
+        user = self.context['request'].user
+        if isinstance(user, User):
+            keep = Keep.objects.filter(user=user, activity=obj).first()
+            if keep:
+                return True
+        return False
+
+    def get_is_share(self, obj):
+        user = self.context['request'].user
+        if isinstance(user, User):
+            shares = obj.targets.all()
+            if shares.filter(user=user):
+                return True
+        return False
+
+    def get_is_comment(self, obj):
+        user = self.context['request'].user
+        if isinstance(user, User):
+            comments = obj.comments.all()
+            if comments:
+                if comments.filter(user=user):
+                    return True
+                else:
+                    for i in comments:
+                        if i.replies.all().filter(from_user=user):
+                            return True
         return False
 
     class Meta:
@@ -122,6 +170,8 @@ class AgreementSerializers(serializers.ModelSerializer):
     address = serializers.SerializerMethodField()
     comment_nums = serializers.SerializerMethodField()
     send_nums = serializers.SerializerMethodField()
+    is_comment = serializers.SerializerMethodField()
+    is_send = serializers.SerializerMethodField()
 
     @staticmethod
     def get_comment_nums(obj):
@@ -132,6 +182,27 @@ class AgreementSerializers(serializers.ModelSerializer):
     def get_send_nums(obj):
         send_nums = obj.sends.count()
         return send_nums
+
+    def get_is_send(self, obj):
+        user = self.context['request'].user
+        if isinstance(user, User):
+            sends = obj.sends.all()
+            if sends.filter(user=user):
+                return True
+        return False
+
+    def get_is_comment(self, obj):
+        user = self.context['request'].user
+        if isinstance(user, User):
+            comments = obj.comments.all()
+            if comments:
+                if comments.filter(user=user):
+                    return True
+                else:
+                    for i in comments:
+                        if i.replies.all().filter(from_user=user):
+                            return True
+        return False
 
     def get_user(self, obj):
         user = UserDetailSerializer(obj.user, context={'request': self.context['request']})

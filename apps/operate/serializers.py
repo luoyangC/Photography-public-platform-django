@@ -6,6 +6,7 @@ from rest_framework import serializers
 
 from operate.models import Keep, Follow, Like, Comment, Reply
 from user.serializers import UserDetailSerializer
+from content.models import Topic
 
 __author__ = '骆杨'
 
@@ -22,12 +23,32 @@ class KeepSerializer(serializers.ModelSerializer):
 
 class FollowSerializer(serializers.ModelSerializer):
 
+    follow = serializers.SerializerMethodField()
+
+    class TopicSerializers(serializers.ModelSerializer):
+
+        class Meta:
+            model = Topic
+            exclude = ('status', 'create_time')
+
+    def get_follow(self, obj):
+        if obj.follow_type == 'user':
+            user = User.objects.filter(id=obj.follow_id).first()
+            return UserDetailSerializer(user).data
+        elif obj.follow_type == 'topic':
+            topic = Topic.objects.filter(id=obj.follow_id).first()
+            return self.TopicSerializers(topic).data
+        else:
+            return None
+
     class Meta:
         model = Follow
-        exclude = ('status', 'create_time')
+        exclude = ('status', 'create_time', 'id')
 
 
 class LikeSerializer(serializers.ModelSerializer):
+
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Like
@@ -36,7 +57,7 @@ class LikeSerializer(serializers.ModelSerializer):
 
 class ReplySerializer(serializers.ModelSerializer):
 
-    from_user = UserDetailSerializer()
+    from_user = UserDetailSerializer(read_only=True)
     to_user = serializers.SerializerMethodField()
 
     def get_to_user(self, obj):
@@ -46,7 +67,7 @@ class ReplySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reply
-        exclude = ('status', 'create_time', 'to_user_id', 'comment')
+        exclude = ('status', 'create_time')
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -56,4 +77,4 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        exclude = ('status', 'create_time', 'agreement', 'activity')
+        exclude = ('status', 'create_time', 'agreement')

@@ -5,9 +5,11 @@ from rest_framework.views import APIView
 from rest_framework_jwt.settings import api_settings
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
-from user.models import UserProfile, EmailVerifyRecord, Address
+from user.models import UserProfile, Address
 from user.serializers import UserCreateSerializer, UserDetailSerializer, EmailVerifySerializer, AddressSerializer
+from utils.email_send import send_email
 from utils.weixin_create import get_weixin_user_info
+from utils.permissions import IsSelfOrReadOnly
 
 # Create your views here.
 
@@ -16,6 +18,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
     queryset = UserProfile.objects.all()
     serializer_class = UserCreateSerializer
+    permission_classes = (permissions.IsAuthenticated, )
+    authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
 
     # 动态配置Serializer
     def get_serializer_class(self):
@@ -23,14 +27,30 @@ class UserViewSet(viewsets.ModelViewSet):
             return UserCreateSerializer
         return UserDetailSerializer
 
-    permission_classes = (permissions.IsAuthenticated, )
-    authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
+    def get_permissions(self):
+        if self.action == 'create':
+            return []
+        return [IsSelfOrReadOnly()]
+
+    # 重写list，返回当前登录用户的信息
+    def list(self, request, *args, **kwargs):
+        queryset = request.user
+
+        serializer = self.get_serializer(queryset)
+        return Response(serializer.data)
 
 
 class EmailVerifyRecordViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
-    queryset = EmailVerifyRecord.objects.all()
     serializer_class = EmailVerifySerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data['email']
+        send_email(email, send_type='register')
+        return Response({'email': email}, status=status.HTTP_201_CREATED)
 
 
 class AddressViewSet(viewsets.ModelViewSet):

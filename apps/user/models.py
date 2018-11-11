@@ -26,7 +26,7 @@ class UserProfile(AbstractUser, Base):
     approve = models.CharField(max_length=12, choices=USER_TYPE, default='general', verbose_name='认证类型')
     mobile = models.CharField(max_length=11, null=True, blank=True, verbose_name='电话')
     email = models.EmailField(max_length=100, null=True, blank=True, verbose_name='邮箱')
-    image = models.URLField(max_length=200, verbose_name='头像')
+    image = models.URLField(default='https://www.luoyangc.cn/static/favicon.ico', max_length=200, verbose_name='头像')
 
     class Meta:
         verbose_name = '用户'
@@ -69,7 +69,7 @@ class EmailVerifyRecord(Base):
     send_type = models.CharField(max_length=10, choices=SEND_TYPE, verbose_name='验证码类型')
 
     class Meta:
-        verbose_name = '邮箱验证码'
+        verbose_name = '验证'
         verbose_name_plural = verbose_name
 
     def __str__(self):

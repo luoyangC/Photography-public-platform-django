@@ -62,6 +62,9 @@ class Comment(Base):
     def __str__(self):
         return self.content
 
+    def get_reply_nums(self):
+        return self.replies.count()
+
 
 class Reply(Base):
     """

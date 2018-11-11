@@ -44,7 +44,7 @@ router.register('reply', operate_views.ReplyViewSet, base_name='reply')
 
 urlpatterns = [
     # 主页地址
-    path('', RedirectView.as_view(url='api/')),
+    path('', RedirectView.as_view(url='api/v1/')),
     # 后台管理
     path('admin/', xadmin.site.urls),
     # 站点图标
@@ -56,9 +56,9 @@ urlpatterns = [
     # DRF文档
     path('docs/', include_docs_urls(title='文档')),
     # 获取授权
-    path('api/login/', obtain_jwt_token),
+    path('api/v1/login/', obtain_jwt_token),
     # 微信授权
-    path('api/weixin/', user_views.WeiXinView.as_view(), name='weixin'),
+    path('api/v1/weixin/', user_views.WeiXinView.as_view(), name='weixin'),
     # API入口
-    path('api/', include(router.urls)),
+    path('api/<str:version>/', include(router.urls)),
 ]
