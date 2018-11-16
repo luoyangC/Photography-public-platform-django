@@ -30,6 +30,8 @@ router.register('topic', content_views.TopicViewSet, base_name='topic')
 router.register('activity', content_views.ActivityViewSet, base_name='activity')
 # 约拍接口
 router.register('agreement', content_views.AgreementViewSet, base_name='agreement')
+# 图片接口
+router.register('photo', content_views.PhotoViewSet, base_name='photo')
 # 收藏接口
 router.register('keep', operate_views.KeepViewSet, base_name='keep')
 # 关注接口

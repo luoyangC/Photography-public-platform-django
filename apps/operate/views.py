@@ -5,16 +5,13 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from operate.models import Keep, Follow, Like, Comment, Reply
 from operate.serializers import KeepSerializer, FollowSerializer, LikeSerializer
-from operate.serializers import CommentSerializer, ReplySerializer
-
-# Create your views here.
+from operate.serializers import CommentSerializer, ReplySerializer, CommentDetailSerializer
 from utils.permissions import IsOwnerOrReadOnly
 
+# Create your views here.
 
-class MyViewSet(mixins.CreateModelMixin,
-                mixins.RetrieveModelMixin,
-                mixins.DestroyModelMixin,
-                mixins.ListModelMixin,
+
+class MyViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin, mixins.ListModelMixin,
                 viewsets.GenericViewSet):
     """
     不提供Update方法
@@ -51,8 +48,12 @@ class CommentViewSet(MyViewSet):
             return [permissions.IsAuthenticated()]
         return [IsOwnerOrReadOnly()]
 
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return CommentDetailSerializer
+        return CommentSerializer
+
     queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
     authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
 
     def perform_create(self, serializer):

@@ -18,14 +18,14 @@ class PhotoSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = Photo
-        fields = ('image', )
+        fields = ('image', 'activity')
 
 
 class SampleSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = Sample
-        fields = ('image',)
+        fields = ('image', 'agreement')
 
 
 class TopicSerializers(serializers.ModelSerializer):
@@ -149,6 +149,8 @@ class ActivityDetailSerializers(ActivitySerializers):
 
 
 class ActivityCreateSerializers(serializers.ModelSerializer):
+
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     def validate(self, attrs):
         if attrs['activity_type'] == 'forward' and not attrs['source_link']:

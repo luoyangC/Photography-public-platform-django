@@ -75,6 +75,8 @@ class Reply(Base):
 
     from_user = models.ForeignKey(UserProfile, related_name='replies', on_delete=models.CASCADE, verbose_name='发送者')
     comment = models.ForeignKey(Comment, related_name='replies', on_delete=models.CASCADE, verbose_name='评论')
+    source_link = models.ForeignKey('self', related_name='next', null=True, blank=True,
+                                    on_delete=models.CASCADE, verbose_name='源回复')
 
     class Meta:
         verbose_name = '回复'
@@ -88,7 +90,10 @@ class Like(Base):
     """
     用户点赞
     """
-    activity = models.ForeignKey(Activity, related_name='likes', on_delete=models.CASCADE, verbose_name='动态')
+    comment = models.ForeignKey(Comment, related_name='likes', null=True, blank=True,
+                                on_delete=models.CASCADE, verbose_name='评论')
+    activity = models.ForeignKey(Activity, related_name='likes', null=True, blank=True,
+                                 on_delete=models.CASCADE, verbose_name='动态')
     user = models.ForeignKey(UserProfile, related_name='likes', on_delete=models.CASCADE, verbose_name='用户')
 
     class Meta:

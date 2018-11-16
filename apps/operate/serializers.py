@@ -59,11 +59,19 @@ class ReplySerializer(serializers.ModelSerializer):
 
     from_user = UserDetailSerializer(read_only=True)
     to_user = serializers.SerializerMethodField()
+    is_author = serializers.SerializerMethodField()
 
     def get_to_user(self, obj):
         user = User.objects.filter(id=obj.to_user_id)[0]
         to_user_serializer = UserDetailSerializer(user, context={'request': self.context['request']})
         return to_user_serializer.data
+
+    def get_is_author(self, obj):
+        user = self.context['request'].user
+        if isinstance(user, User):
+            if user == obj.from_user:
+                return True
+        return False
 
     class Meta:
         model = Reply
@@ -72,9 +80,37 @@ class ReplySerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
 
-    replies = ReplySerializer(many=True)
+    reply_nums = serializers.SerializerMethodField()
+    replies = serializers.SerializerMethodField()
+    is_author = serializers.SerializerMethodField()
     user = UserDetailSerializer(read_only=True)
+
+    def get_reply_nums(self, obj):
+        reply_nums = obj.replies.count()
+        return reply_nums
+
+    def get_replies(self, obj):
+        replies = obj.replies.all()
+        if len(replies) > 2:
+            replies = replies.all()[:2]
+        replies_serializers = ReplySerializer(replies, many=True, context={'request': self.context['request']})
+        return replies_serializers.data
+
+    def get_is_author(self, obj):
+        user = self.context['request'].user
+        if isinstance(user, User):
+            if user == obj.user:
+                return True
+        return False
 
     class Meta:
         model = Comment
-        exclude = ('status', 'create_time', 'agreement')
+        exclude = ('status', 'agreement')
+
+
+class CommentDetailSerializer(CommentSerializer):
+
+    def get_replies(self, obj):
+        replies = obj.replies.all()
+        replies_serializers = ReplySerializer(replies, many=True, context={'request': self.context['request']})
+        return replies_serializers.data

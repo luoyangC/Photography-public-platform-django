@@ -4,13 +4,20 @@ from rest_framework.filters import OrderingFilter
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django_filters.rest_framework import DjangoFilterBackend
 
-from content.models import Topic, Activity, Agreement
+from content.models import Topic, Activity, Agreement, Photo
 from content.serializers import TopicSerializers, ActivitySerializers, AgreementSerializers, ActivityDetailSerializers
 from content.serializers import ActivityCreateSerializers, AgreementCreateSerializers, AgreementDetailSerializer
+from content.serializers import PhotoSerializers
 from content.filters import ActivityFilter
 from utils.permissions import IsOwnerOrReadOnly
 
 # Create your views here.
+
+
+class PhotoViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+
+    queryset = Photo.objects.all()
+    serializer_class = PhotoSerializers
 
 
 class TopicViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
