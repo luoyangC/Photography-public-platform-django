@@ -6,8 +6,7 @@ from rest_framework import serializers
 
 from content.models import Topic, Activity, Agreement, Photo, Sample
 from user.serializers import UserDetailSerializer, AddressSerializer
-from operate.serializers import CommentSerializer
-from operate.models import Like, Keep
+from operate.models import Like, Keep, Follow
 
 __author__ = '骆杨'
 
@@ -29,6 +28,16 @@ class SampleSerializers(serializers.ModelSerializer):
 
 
 class TopicSerializers(serializers.ModelSerializer):
+
+    is_follow = serializers.SerializerMethodField()
+
+    def get_is_follow(self, obj):
+        user = self.context['request'].user
+        if isinstance(user, User):
+            follow = Follow.objects.filter(user=user, follow_type='topic', follow_id=obj.id).first()
+            if follow:
+                return follow.id
+        return False
 
     class Meta:
         model = Topic
@@ -106,7 +115,7 @@ class ActivitySerializers(serializers.ModelSerializer):
         if isinstance(user, User):
             like = Like.objects.filter(user=user, activity=obj).first()
             if like:
-                return True
+                return like.id
         return False
 
     def get_is_keep(self, obj):
@@ -114,7 +123,7 @@ class ActivitySerializers(serializers.ModelSerializer):
         if isinstance(user, User):
             keep = Keep.objects.filter(user=user, activity=obj).first()
             if keep:
-                return True
+                return keep.id
         return False
 
     def get_is_share(self, obj):
@@ -141,11 +150,6 @@ class ActivitySerializers(serializers.ModelSerializer):
     class Meta:
         model = Activity
         exclude = ('status', 'source_link')
-
-
-class ActivityDetailSerializers(ActivitySerializers):
-
-    comments = CommentSerializer(many=True, read_only=True)
 
 
 class ActivityCreateSerializers(serializers.ModelSerializer):
@@ -217,10 +221,6 @@ class AgreementSerializers(serializers.ModelSerializer):
     class Meta:
         model = Agreement
         exclude = ('status', )
-
-
-class AgreementDetailSerializer(AgreementSerializers):
-    comments = CommentSerializer(many=True, read_only=True)
 
 
 class AgreementCreateSerializers(serializers.ModelSerializer):

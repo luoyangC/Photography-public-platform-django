@@ -24,6 +24,7 @@ class Topic(Base):
     title = models.CharField(max_length=50, verbose_name='主题名称')
     info = models.CharField(max_length=500, verbose_name='主题描述')
     follow_nums = models.IntegerField(default=0, verbose_name='关注数')
+    image = models.ImageField(default='/image/topic/default.png', upload_to='image/topic/%Y/%m', verbose_name='图片')
 
     class Meta:
         verbose_name = '主题'

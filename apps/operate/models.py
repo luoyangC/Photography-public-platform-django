@@ -90,8 +90,6 @@ class Like(Base):
     """
     用户点赞
     """
-    comment = models.ForeignKey(Comment, related_name='likes', null=True, blank=True,
-                                on_delete=models.CASCADE, verbose_name='评论')
     activity = models.ForeignKey(Activity, related_name='likes', null=True, blank=True,
                                  on_delete=models.CASCADE, verbose_name='动态')
     user = models.ForeignKey(UserProfile, related_name='likes', on_delete=models.CASCADE, verbose_name='用户')
