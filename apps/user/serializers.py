@@ -55,7 +55,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ('nick_name', 'birthday', 'gender', 'approve', 'email', 'mobile', 'image', 'id')
+        fields = ('nick_name', 'birthday', 'gender', 'approve', 'email', 'mobile', 'image', 'id', 'simple_info')
 
 
 class EmailVerifySerializer(serializers.ModelSerializer):

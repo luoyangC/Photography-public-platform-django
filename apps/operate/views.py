@@ -5,9 +5,9 @@ from rest_framework.filters import OrderingFilter
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from operate.models import Keep, Follow, Like, Comment, Reply
-from operate.filters import CommentFilter
+from operate.filters import CommentFilter, ReplyFilter
 from operate.serializers import KeepSerializer, FollowSerializer, LikeSerializer
-from operate.serializers import CommentSerializer, ReplySerializer, CommentDetailSerializer
+from operate.serializers import CommentSerializer, ReplySerializer
 from utils.permissions import IsOwnerOrReadOnly, IsFromOrReadOnly
 
 # Create your views here.
@@ -52,11 +52,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             return [permissions.IsAuthenticated()]
         return [IsOwnerOrReadOnly()]
 
-    def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return CommentDetailSerializer
-        return CommentSerializer
-
+    serializer_class = CommentSerializer
     queryset = Comment.objects.all()
     authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
 
@@ -78,6 +74,10 @@ class ReplyViewSet(viewsets.ModelViewSet):
     queryset = Reply.objects.all()
     serializer_class = ReplySerializer
     authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
+
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filter_class = ReplyFilter
+    ordering_fields = ('update_time',)
 
     def perform_create(self, serializer):
         serializer.save(from_user=self.request.user)

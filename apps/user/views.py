@@ -1,5 +1,7 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, viewsets, permissions, status
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_jwt.settings import api_settings
@@ -7,6 +9,7 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from user.models import UserProfile, Address
 from user.serializers import UserCreateSerializer, UserDetailSerializer, EmailVerifySerializer, AddressSerializer
+from user.filters import UserFilter
 from utils.email_send import send_email
 from utils.weixin_create import get_weixin_user_info
 from utils.permissions import IsSelfOrReadOnly
@@ -18,8 +21,11 @@ class UserViewSet(viewsets.ModelViewSet):
 
     queryset = UserProfile.objects.all()
     serializer_class = UserCreateSerializer
-    permission_classes = (permissions.IsAuthenticated, )
     authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
+
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filter_class = UserFilter
+    ordering_fields = ('update_time',)
 
     # 动态配置Serializer
     def get_serializer_class(self):
@@ -31,13 +37,6 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             return []
         return [IsSelfOrReadOnly()]
-
-    # 重写list，返回当前登录用户的信息
-    def list(self, request, *args, **kwargs):
-        queryset = request.user
-
-        serializer = self.get_serializer(queryset)
-        return Response(serializer.data)
 
 
 class EmailVerifyRecordViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):

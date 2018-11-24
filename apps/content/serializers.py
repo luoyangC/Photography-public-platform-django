@@ -30,6 +30,11 @@ class SampleSerializers(serializers.ModelSerializer):
 class TopicSerializers(serializers.ModelSerializer):
 
     is_follow = serializers.SerializerMethodField()
+    follow_nums = serializers.SerializerMethodField()
+
+    def get_follow_nums(self, obj):
+        follow_nums = Follow.objects.filter(follow_type='topic', follow_id=obj.id).count()
+        return follow_nums
 
     def get_is_follow(self, obj):
         user = self.context['request'].user

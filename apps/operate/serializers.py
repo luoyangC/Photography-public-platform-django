@@ -88,28 +88,15 @@ class ReplySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reply
-        exclude = ('status', 'create_time')
+        exclude = ('status', )
 
 
 class CommentSerializer(serializers.ModelSerializer):
     """
     评论的序列化类
     """
-    reply_nums = serializers.SerializerMethodField()
-    replies = serializers.SerializerMethodField()
     is_author = serializers.SerializerMethodField()
     user = UserDetailSerializer(read_only=True)
-
-    def get_reply_nums(self, obj):
-        reply_nums = obj.replies.count()
-        return reply_nums
-
-    def get_replies(self, obj):
-        replies = obj.replies.all()
-        if len(replies) > 2:
-            replies = replies.all()[:2]
-        replies_serializers = ReplySerializer(replies, many=True, context={'request': self.context['request']})
-        return replies_serializers.data
 
     def get_is_author(self, obj):
         user = self.context['request'].user
@@ -120,14 +107,4 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        exclude = ('status', 'agreement')
-
-
-class CommentDetailSerializer(CommentSerializer):
-    """
-    评论详情的序列化类
-    """
-    def get_replies(self, obj):
-        replies = obj.replies.all()
-        replies_serializers = ReplySerializer(replies, many=True, context={'request': self.context['request']})
-        return replies_serializers.data
+        exclude = ('status',)
