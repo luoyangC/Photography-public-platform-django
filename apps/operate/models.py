@@ -70,11 +70,14 @@ class Reply(Base):
     """
     用户回复
     """
-    to_user_id = models.IntegerField(null=False, blank=False, verbose_name='接收者')
     content = models.TextField(verbose_name='回复内容')
 
-    from_user = models.ForeignKey(UserProfile, related_name='replies', on_delete=models.CASCADE, verbose_name='发送者')
-    comment = models.ForeignKey(Comment, related_name='replies', on_delete=models.CASCADE, verbose_name='评论')
+    to_user = models.ForeignKey(UserProfile, related_name='reply_receives',
+                                on_delete=models.CASCADE, verbose_name='接收者')
+    from_user = models.ForeignKey(UserProfile, related_name='reply_sends',
+                                  on_delete=models.CASCADE, verbose_name='发送者')
+    comment = models.ForeignKey(Comment, related_name='replies',
+                                on_delete=models.CASCADE, verbose_name='评论')
     source_link = models.ForeignKey('self', related_name='next', null=True, blank=True,
                                     on_delete=models.CASCADE, verbose_name='源回复')
 
@@ -102,18 +105,36 @@ class Like(Base):
         return self.user.nick_name
 
 
-class Send(Base):
+class Message(Base):
     """
     发起约拍
     """
-    content = models.TextField(verbose_name='内容')
-    answer = models.BooleanField(default=False, verbose_name='回答')
+    MESSAGE_TYPE = (
+        ('letter', '私信'),
+        ('invite', '邀请'),
+        ('reply', '回复'),
+        ('notice', '通知'),
+    )
+    ANSWER_TYPE = (
+        (1, '未定义'),
+        (2, '未回复'),
+        (3, '同意'),
+        (4, '拒绝'),
+    )
+    content = models.TextField(null=True, blank=True, verbose_name='内容')
+    read = models.BooleanField(default=False, verbose_name='已读')
+    answer = models.IntegerField(default=1, choices=ANSWER_TYPE, verbose_name='回答')
+    message_type = models.CharField(max_length=10, choices=MESSAGE_TYPE, verbose_name='消息类型')
 
-    agreement = models.ForeignKey(Agreement, related_name='sends', on_delete=models.CASCADE, verbose_name='约拍')
-    user = models.ForeignKey(UserProfile, related_name='sends', on_delete=models.CASCADE, verbose_name='用户')
+    agreement = models.ForeignKey(Agreement, related_name='messages', null=True, blank=True,
+                                  on_delete=models.CASCADE, verbose_name='约拍')
+    to_user = models.ForeignKey(UserProfile, related_name='message_receives',
+                                on_delete=models.CASCADE, verbose_name='接收者')
+    from_user = models.ForeignKey(UserProfile, related_name='message_sends',
+                                  on_delete=models.CASCADE, verbose_name='发送者')
 
     class Meta:
-        verbose_name = '发起'
+        verbose_name = '消息'
         verbose_name_plural = verbose_name
 
     def __str__(self):

@@ -23,6 +23,9 @@ djangorestframework-jwt = "*"
 django-cors-headers = "*"
 drf-extensions = "*"
 django-redis = "*"
+channels = "*"
+"pywin32" = "*"
+channels-redis = "*"
 
 [dev-packages]
 

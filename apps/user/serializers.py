@@ -8,6 +8,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from user.models import UserProfile, EmailVerifyRecord, Address
+from operate.models import Follow
 
 __author__ = '骆杨'
 
@@ -53,9 +54,30 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
 class UserDetailSerializer(serializers.ModelSerializer):
 
+    follow_nums = serializers.SerializerMethodField()
+    is_follow = serializers.SerializerMethodField()
+
+    def get_follow_nums(self, obj):
+        user = self.context['request'].user
+        if isinstance(user, User):
+            follow_nums = Follow.objects.filter(follow_type='user', follow_id=obj.id).count()
+            if follow_nums:
+                return follow_nums
+        return False
+
+    def get_is_follow(self, obj):
+        user = self.context['request'].user
+        if isinstance(user, User):
+            follow = Follow.objects.filter(user=user, follow_type='user', follow_id=obj.id).first()
+            if follow:
+                return follow.id
+        return False
+
     class Meta:
         model = UserProfile
-        fields = ('nick_name', 'birthday', 'gender', 'approve', 'email', 'mobile', 'image', 'id', 'simple_info')
+        fields = ('nick_name', 'birthday', 'gender', 'approve',
+                  'email', 'mobile', 'image', 'id', 'simple_info',
+                  'is_follow', 'follow_nums')
 
 
 class EmailVerifySerializer(serializers.ModelSerializer):

@@ -42,6 +42,8 @@ router.register('like', operate_views.LikeViewSet, base_name='like')
 router.register('comment', operate_views.CommentViewSet, base_name='comment')
 # 回复接口
 router.register('reply', operate_views.ReplyViewSet, base_name='reply')
+# 消息接口
+router.register('message', operate_views.MessageViewSet, base_name='message')
 
 
 urlpatterns = [
@@ -53,14 +55,14 @@ urlpatterns = [
     path('favicon.ico', RedirectView.as_view(url='static/favicon.ico')),
     # 媒体文件
     path('media/<path:path>', serve, {'document_root': MEDIA_ROOT}),
+    # 微信授权
+    path('api/v1/weixin/', user_views.WeiXinView.as_view(), name='weixin'),
+    # JWT授权
+    path('api/v1/login/', obtain_jwt_token),
     # DRF登录
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     # DRF文档
     path('docs/', include_docs_urls(title='文档')),
-    # 获取授权
-    path('api/v1/login/', obtain_jwt_token),
-    # 微信授权
-    path('api/v1/weixin/', user_views.WeiXinView.as_view(), name='weixin'),
     # API入口
     path('api/<str:version>/', include(router.urls)),
 ]

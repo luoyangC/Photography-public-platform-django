@@ -13,7 +13,7 @@ class ActivityFilter(django_filters.rest_framework.FilterSet):
     """
     动态过滤器
     """
-    follow = django_filters.CharFilter(method='follow_filter')
+    follow = django_filters.CharFilter(method='follow_filter', label='关注类型')
 
     def follow_filter(self, queryset, name, value):
         follow_type = value

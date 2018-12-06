@@ -180,9 +180,10 @@ class AgreementSerializers(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     address = serializers.SerializerMethodField()
     comment_nums = serializers.SerializerMethodField()
-    send_nums = serializers.SerializerMethodField()
+    message_nums = serializers.SerializerMethodField()
+    is_author = serializers.SerializerMethodField()
     is_comment = serializers.SerializerMethodField()
-    is_send = serializers.SerializerMethodField()
+    is_message = serializers.SerializerMethodField()
 
     @staticmethod
     def get_comment_nums(obj):
@@ -190,16 +191,23 @@ class AgreementSerializers(serializers.ModelSerializer):
         return comment_nums
 
     @staticmethod
-    def get_send_nums(obj):
-        send_nums = obj.sends.count()
-        return send_nums
+    def get_message_nums(obj):
+        message_nums = obj.messages.count()
+        return message_nums
 
-    def get_is_send(self, obj):
+    def get_is_author(self, obj):
         user = self.context['request'].user
         if isinstance(user, User):
-            sends = obj.sends.all()
-            if sends.filter(user=user):
+            if user == obj.user:
                 return True
+        return False
+
+    def get_is_message(self, obj):
+        user = self.context['request'].user
+        if isinstance(user, User):
+            message = obj.messages.filter(from_user=user).first()
+            if message:
+                return message.id
         return False
 
     def get_is_comment(self, obj):

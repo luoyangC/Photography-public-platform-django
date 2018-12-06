@@ -9,9 +9,9 @@ __author__ = '骆杨'
 
 class UserFilter(django_filters.rest_framework.FilterSet):
     """
-    评论过滤器
+    用户过滤器
     """
-    self = django_filters.BooleanFilter(method='self_filter')
+    self = django_filters.BooleanFilter(method='self_filter', label='当前用户')
 
     def self_filter(self, queryset, name, value):
         user = self.request.user

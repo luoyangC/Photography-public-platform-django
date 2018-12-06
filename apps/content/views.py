@@ -65,5 +65,5 @@ class AgreementViewSet(viewsets.ModelViewSet):
             return [permissions.IsAuthenticated()]
         return [IsOwnerOrReadOnly()]
 
-    queryset = Agreement.objects.all()
+    queryset = Agreement.objects.all().order_by('-update_time')
     authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
