@@ -50,9 +50,9 @@ class Comment(Base):
     content = models.TextField(verbose_name='评论内容')
 
     agreement = models.ForeignKey(Agreement, null=True, blank=True, related_name='comments',
-                                  on_delete=models.SET_NULL, verbose_name='评论的约拍')
+                                  on_delete=models.CASCADE, verbose_name='评论的约拍')
     activity = models.ForeignKey(Activity, null=True, blank=True, related_name='comments',
-                                 on_delete=models.SET_NULL, verbose_name='评论的动态')
+                                 on_delete=models.CASCADE, verbose_name='评论的动态')
     user = models.ForeignKey(UserProfile, related_name='comments', on_delete=models.CASCADE, verbose_name='评论者')
 
     class Meta:
@@ -114,6 +114,8 @@ class Message(Base):
         ('invite', '邀请'),
         ('reply', '回复'),
         ('notice', '通知'),
+        ('report', '举报'),
+        ('feedback', '反馈'),
     )
     ANSWER_TYPE = (
         (1, '未定义'),
@@ -126,8 +128,14 @@ class Message(Base):
     answer = models.IntegerField(default=1, choices=ANSWER_TYPE, verbose_name='回答')
     message_type = models.CharField(max_length=10, choices=MESSAGE_TYPE, verbose_name='消息类型')
 
-    agreement = models.ForeignKey(Agreement, related_name='messages', null=True, blank=True,
+    comment = models.ForeignKey(Comment, related_name='message_comment', null=True, blank=True,
+                                on_delete=models.CASCADE, verbose_name='评论')
+    replay = models.OneToOneField(Reply, related_name='message_replay', null=True, blank=True,
+                                  on_delete=models.CASCADE, verbose_name='回复')
+    agreement = models.ForeignKey(Agreement, related_name='message_agreement', null=True, blank=True,
                                   on_delete=models.CASCADE, verbose_name='约拍')
+    activity = models.ForeignKey(Activity, related_name='message_activity', null=True, blank=True,
+                                 on_delete=models.CASCADE, verbose_name='动态')
     to_user = models.ForeignKey(UserProfile, related_name='message_receives',
                                 on_delete=models.CASCADE, verbose_name='接收者')
     from_user = models.ForeignKey(UserProfile, related_name='message_sends',

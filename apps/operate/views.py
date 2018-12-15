@@ -6,8 +6,8 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from operate.models import Keep, Follow, Like, Comment, Reply, Message
 from operate.filters import CommentFilter, ReplyFilter, MessageFilter
-from operate.serializers import KeepSerializer, FollowSerializer, LikeSerializer
-from operate.serializers import CommentSerializer, ReplySerializer, MessageSerializer
+from operate.serializers import KeepSerializer, FollowSerializer, LikeSerializer, ReplayDetailSerializer
+from operate.serializers import CommentSerializer, ReplySerializer, MessageSerializer, CommentDetailSerializer
 from utils.permissions import IsOwnerOrReadOnly, IsFromOrReadOnly, IsToOrReadOnly
 
 # Create your views here.
@@ -66,8 +66,12 @@ class CommentViewSet(viewsets.ModelViewSet):
     authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
 
     # 模型和序列化
+    def get_serializer_class(self):
+        is_detail = self.request.query_params.get('is_detail')
+        if is_detail == '2' or is_detail == 2:
+            return CommentDetailSerializer
+        return CommentSerializer
     queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
 
     # 查询和过滤、排序
     filter_backends = (DjangoFilterBackend, OrderingFilter)
@@ -88,7 +92,11 @@ class ReplyViewSet(viewsets.ModelViewSet):
     authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
 
     # 模型和序列化
-    serializer_class = ReplySerializer
+    def get_serializer_class(self):
+        is_detail = self.request.query_params.get('is_detail')
+        if is_detail == '2' or is_detail == 2:
+            return ReplayDetailSerializer
+        return ReplySerializer
     queryset = Reply.objects.all()
 
     # 查询和过滤、排序

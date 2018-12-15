@@ -73,9 +73,7 @@ class WeiXinView(APIView):
 
         # 生成用户token，返回给前端
         token = self.create_token(user)
-        serializer = UserDetailSerializer(user)
-        data = serializer.data
-        return Response({'token': token, 'userInfo': data}, status=status.HTTP_200_OK)
+        return Response({'token': token}, status=status.HTTP_200_OK)
 
     @staticmethod
     def create_token(user):

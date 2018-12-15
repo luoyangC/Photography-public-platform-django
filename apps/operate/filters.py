@@ -15,15 +15,27 @@ class CommentFilter(django_filters.rest_framework.FilterSet):
     """
     评论过滤器
     """
+    is_detail = django_filters.BooleanFilter(method='is_detail_filter', label='显示详情')
+
+    def is_detail_filter(self, queryset, name, value):
+        # 该过滤器没有实际过滤效果，只是因为在viewSet中使用到了
+        return queryset
+
     class Meta:
         model = Comment
-        fields = ['activity', 'user', 'agreement']
+        fields = ['activity', 'user', 'agreement', 'is_detail']
 
 
 class ReplyFilter(django_filters.rest_framework.FilterSet):
     """
     回复过滤器
     """
+    is_detail = django_filters.BooleanFilter(method='is_detail_filter', label='显示详情')
+
+    def is_detail_filter(self, queryset, name, value):
+        # 该过滤器没有实际过滤效果，只是因为在viewSet中使用到了
+        return queryset
+
     class Meta:
         model = Reply
         fields = ['comment', 'from_user']
@@ -33,10 +45,17 @@ class MessageFilter(django_filters.rest_framework.FilterSet):
     """
     消息过滤器
     """
+    real_invite = django_filters.BooleanFilter(method='real_invite_filter', label='邀请')
     agreement = django_filters.NumberFilter(method='agreement_filter', label='约拍')
     is_from = django_filters.BooleanFilter(method='is_from_filter', label='是发送者')
     is_to = django_filters.BooleanFilter(method='is_to_filter', label='是接收者')
     other = django_filters.NumberFilter(method='other_filter', label='对方')
+
+    def real_invite_filter(self, queryset, name, value):
+        if value:
+            queryset = queryset.exclude(answer=1)
+            return queryset
+        return queryset
 
     def other_filter(self, queryset, name, value):
         current_user = self.request.user
@@ -92,4 +111,4 @@ class MessageFilter(django_filters.rest_framework.FilterSet):
 
     class Meta:
         model = Message
-        fields = ['agreement', 'message_type', 'read', 'is_from', 'is_to', 'other']
+        fields = ['agreement', 'message_type', 'read', 'is_from', 'is_to', 'other', 'real_invite']

@@ -5,8 +5,8 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from content.models import Topic, Activity, Agreement, Photo, Sample
-from user.serializers import UserDetailSerializer, AddressSerializer
 from operate.models import Like, Keep, Follow
+from user.serializers import UserDetailSerializer, AddressSerializer
 
 __author__ = '骆杨'
 
@@ -192,7 +192,7 @@ class AgreementSerializers(serializers.ModelSerializer):
 
     @staticmethod
     def get_message_nums(obj):
-        message_nums = obj.messages.count()
+        message_nums = obj.message_agreement.count()
         return message_nums
 
     def get_is_author(self, obj):
@@ -205,7 +205,7 @@ class AgreementSerializers(serializers.ModelSerializer):
     def get_is_message(self, obj):
         user = self.context['request'].user
         if isinstance(user, User):
-            message = obj.messages.filter(from_user=user).first()
+            message = obj.message_agreement.filter(from_user=user).first()
             if message:
                 return message.id
         return False

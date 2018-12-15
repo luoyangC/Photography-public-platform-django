@@ -6,7 +6,7 @@ from rest_framework import serializers
 
 from operate.models import Keep, Follow, Like, Comment, Reply, Message
 from user.serializers import UserDetailSerializer
-from content.serializers import ActivitySerializers
+from content.serializers import ActivitySerializers, AgreementSerializers
 from content.models import Topic
 
 __author__ = '骆杨'
@@ -20,7 +20,6 @@ class KeepSerializer(serializers.ModelSerializer):
     收藏的序列化类
     """
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    activity = ActivitySerializers()
 
     class Meta:
         model = Keep
@@ -66,6 +65,36 @@ class LikeSerializer(serializers.ModelSerializer):
         fields = ('id', 'user', 'activity')
 
 
+class CommentSerializer(serializers.ModelSerializer):
+    """
+    评论的序列化类
+    """
+    is_author = serializers.SerializerMethodField()
+    user = UserDetailSerializer(read_only=True)
+
+    def validate(self, attrs):
+        if attrs['activity'] and attrs['agreement']:
+            raise serializers.ValidationError("activity or agreement only one")
+        attrs['user'] = self.context['request'].user
+        return attrs
+
+    def get_is_author(self, obj):
+        user = self.context['request'].user
+        if isinstance(user, User):
+            if user == obj.user:
+                return True
+        return False
+
+    class Meta:
+        model = Comment
+        exclude = ('status',)
+
+
+class CommentDetailSerializer(CommentSerializer):
+    activity = ActivitySerializers()
+    agreement = AgreementSerializers()
+
+
 class ReplySerializer(serializers.ModelSerializer):
     """
     回复的序列化类
@@ -82,14 +111,10 @@ class ReplySerializer(serializers.ModelSerializer):
         return False
 
     def validate(self, attrs):
-        if attrs['comment'] and attrs['source_link']:
-            raise serializers.ValidationError('the comment and source_link only one')
         if attrs['comment']:
             attrs['to_user'] = attrs['comment'].user
-        elif attrs['source_link']:
+        if attrs['source_link']:
             attrs['to_user'] = attrs['source_link'].from_user
-        else:
-            raise serializers.ValidationError('the comment and source_link must one')
         attrs['from_user'] = self.context['request'].user
         return attrs
 
@@ -98,28 +123,9 @@ class ReplySerializer(serializers.ModelSerializer):
         exclude = ('status', )
 
 
-class CommentSerializer(serializers.ModelSerializer):
-    """
-    评论的序列化类
-    """
-    is_author = serializers.SerializerMethodField()
-    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-
-    def validate(self, attrs):
-        if attrs['activity'] and attrs['agreement']:
-            raise serializers.ValidationError("activity or agreement only one")
-        return attrs
-
-    def get_is_author(self, obj):
-        user = self.context['request'].user
-        if isinstance(user, User):
-            if user == obj.user:
-                return True
-        return False
-
-    class Meta:
-        model = Comment
-        exclude = ('status',)
+class ReplayDetailSerializer(ReplySerializer):
+    source_link = ReplySerializer()
+    comment = CommentDetailSerializer()
 
 
 class MessageSerializer(serializers.ModelSerializer):
@@ -131,9 +137,11 @@ class MessageSerializer(serializers.ModelSerializer):
     from_user = UserDetailSerializer(read_only=True)
 
     def validate(self, attrs):
-        if attrs['to_user'] == self.context['request'].user:
-            raise serializers.ValidationError("to_user must not from_user")
-        attrs['from_user'] = self.context['request'].user
+        if self.context['view'].action == 'create':
+            if attrs['to_user'] == self.context['request'].user:
+                raise serializers.ValidationError("to_user must not from_user")
+            attrs['from_user'] = self.context['request'].user
+            return attrs
         return attrs
 
     class Meta:
