@@ -15,22 +15,44 @@ User = get_user_model()
 
 class PhotoSerializers(serializers.ModelSerializer):
 
+    image = serializers.SerializerMethodField()
+    thumbnail = serializers.SerializerMethodField()
+
+    def get_image(self, obj):
+        return obj.image.url + '/amor'
+
+    def get_thumbnail(self, obj):
+        return obj.image.url + '/thumbnail'
+
     class Meta:
         model = Photo
-        fields = ('image', 'activity')
+        fields = ('image', 'thumbnail', 'activity')
 
 
 class SampleSerializers(serializers.ModelSerializer):
 
+    image = serializers.SerializerMethodField()
+    thumbnail = serializers.SerializerMethodField()
+
+    def get_image(self, obj):
+        return obj.image.url + '/amor'
+
+    def get_thumbnail(self, obj):
+        return obj.image.url + '/thumbnail'
+
     class Meta:
         model = Sample
-        fields = ('image', 'agreement')
+        fields = ('image', 'thumbnail', 'agreement')
 
 
 class TopicSerializers(serializers.ModelSerializer):
 
     is_follow = serializers.SerializerMethodField()
     follow_nums = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
+
+    def get_image(self, obj):
+        return obj.image.url + '/avatar'
 
     def get_follow_nums(self, obj):
         follow_nums = Follow.objects.filter(follow_type='topic', follow_id=obj.id).count()

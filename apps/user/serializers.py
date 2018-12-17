@@ -56,6 +56,10 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
     follow_nums = serializers.SerializerMethodField()
     is_follow = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
+
+    def get_image(self, obj):
+        return obj.image.url + '/avatar'
 
     def get_follow_nums(self, obj):
         user = self.context['request'].user

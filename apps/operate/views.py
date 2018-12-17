@@ -123,3 +123,6 @@ class MessageViewSet(viewsets.ModelViewSet):
     # 查询和过滤
     filter_backends = (DjangoFilterBackend, )
     filter_class = MessageFilter
+
+    def perform_update(self, serializer):
+        serializer.save(read=self.request.data['read'])
