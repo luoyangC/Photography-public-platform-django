@@ -2,10 +2,9 @@
 ### Python template
 
 .gitignore
-.idea
-media
-photography/settings.py
-Pipfile.lock
-db.sqlite3
-photography/__pycache__/
+.vscode/
+media/
 templates/
+photography/settings.py
+Pipfile
+Pipfile.lock
