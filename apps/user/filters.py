@@ -11,7 +11,9 @@ class UserFilter(django_filters.rest_framework.FilterSet):
     """
     用户过滤器
     """
+
     self = django_filters.BooleanFilter(method='self_filter', label='当前用户')
+    search = django_filters.CharFilter(field_name='nick_name', lookup_expr='icontains', label='用户昵称')
 
     def self_filter(self, queryset, name, value):
         user = self.request.user
@@ -21,4 +23,4 @@ class UserFilter(django_filters.rest_framework.FilterSet):
 
     class Meta:
         model = UserProfile
-        fields = ['self', 'approve']
+        fields = ['self', 'approve', 'search']

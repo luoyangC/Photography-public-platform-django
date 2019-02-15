@@ -24,10 +24,12 @@ django-cors-headers = "*"
 drf-extensions = "*"
 django-redis = "*"
 channels = "*"
-"pywin32" = "*"
+pywin32 = "*"
 channels-redis = "*"
+python-weixin = "*"
 
 [dev-packages]
+pylint = "*"
 
 [requires]
-python_version = "3.6"
+python_version = "3.7"

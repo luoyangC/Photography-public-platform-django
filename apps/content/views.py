@@ -1,12 +1,13 @@
 from rest_framework import mixins, viewsets, permissions
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.filters import OrderingFilter
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django_filters.rest_framework import DjangoFilterBackend
 
-from content.models import Topic, Activity, Agreement, Photo
+from content.models import Topic, Activity, Agreement, Photo, Sample
 from content.serializers import TopicSerializers, ActivitySerializers, AgreementSerializers
-from content.serializers import ActivityCreateSerializers, AgreementCreateSerializers
+from content.serializers import ActivityCreateSerializers, AgreementCreateSerializers, SampleSerializers
+from content.serializers import PhotoCreateSerializers, SampleCreateSerializers
 from content.serializers import PhotoSerializers
 from content.filters import ActivityFilter
 from utils.permissions import IsOwnerOrReadOnly
@@ -16,8 +17,22 @@ from utils.permissions import IsOwnerOrReadOnly
 
 class PhotoViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return PhotoCreateSerializers
+        return PhotoSerializers
+
     queryset = Photo.objects.all()
-    serializer_class = PhotoSerializers
+
+
+class SampleViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return SampleCreateSerializers
+        return SampleSerializers
+
+    queryset = Sample.objects.all()
 
 
 class TopicViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
@@ -25,6 +40,8 @@ class TopicViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.Ge
     queryset = Topic.objects.all()
     serializer_class = TopicSerializers
     authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
+    filter_backends = (SearchFilter,)
+    search_fields = ('title', )
 
 
 class ActivityViewSet(viewsets.ModelViewSet):
@@ -67,3 +84,6 @@ class AgreementViewSet(viewsets.ModelViewSet):
 
     queryset = Agreement.objects.all().order_by('-update_time')
     authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
+
+    filter_backends = (SearchFilter,)
+    search_fields = ('content', 'address')

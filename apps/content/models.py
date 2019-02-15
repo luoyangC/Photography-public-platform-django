@@ -26,6 +26,8 @@ class Topic(Base):
     follow_nums = models.IntegerField(default=0, verbose_name='关注数')
     image = models.ImageField(default='/image/topic/default.png', upload_to='image/topic/%Y/%m', verbose_name='图片')
 
+    user = models.ForeignKey(UserProfile, related_name='topic', on_delete=models.CASCADE, verbose_name='作者')
+
     class Meta:
         verbose_name = '主题'
         verbose_name_plural = verbose_name
@@ -73,6 +75,7 @@ class Activity(Content):
         ('forward', '转载'),
     )
     activity_type = models.CharField(max_length=10, choices=ACTIVITY_TYPE, verbose_name='动态类型')
+    address = models.CharField(max_length=100, null=True, blank=True, verbose_name='地址')
 
     user = models.ForeignKey(UserProfile, related_name='contents', on_delete=models.CASCADE, verbose_name='作者')
     source_link = models.ForeignKey('self', null=True, blank=True, related_name='targets',
@@ -106,9 +109,9 @@ class Agreement(Content):
     agreement_type = models.CharField(max_length=5, choices=AGREEMENT_TYPE, verbose_name='约拍类型')
     amount = models.FloatField(default=0, verbose_name='金额')
     tags = models.CharField(max_length=100, null=True, blank=True, verbose_name='标签')
+    address = models.CharField(max_length=100, null=False, blank=False, verbose_name='地址')
 
     user = models.ForeignKey(UserProfile, related_name='agreements', on_delete=models.CASCADE, verbose_name='作者')
-    address = models.ForeignKey(Address, related_name='agreements', on_delete=models.CASCADE, verbose_name='地址')
 
     class Meta:
         verbose_name = '约拍'

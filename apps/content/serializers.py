@@ -6,7 +6,7 @@ from rest_framework import serializers
 
 from content.models import Topic, Activity, Agreement, Photo, Sample
 from operate.models import Like, Keep, Follow
-from user.serializers import UserDetailSerializer, AddressSerializer
+from user.serializers import UserDetailSerializer
 
 __author__ = '骆杨'
 
@@ -29,6 +29,13 @@ class PhotoSerializers(serializers.ModelSerializer):
         fields = ('image', 'thumbnail', 'activity')
 
 
+class PhotoCreateSerializers(serializers.ModelSerializer):
+
+    class Meta:
+        model = Photo
+        fields = ('image', 'activity')
+
+
 class SampleSerializers(serializers.ModelSerializer):
 
     image = serializers.SerializerMethodField()
@@ -43,6 +50,13 @@ class SampleSerializers(serializers.ModelSerializer):
     class Meta:
         model = Sample
         fields = ('image', 'thumbnail', 'agreement')
+
+
+class SampleCreateSerializers(serializers.ModelSerializer):
+
+    class Meta:
+        model = Sample
+        fields = ('image', 'agreement')
 
 
 class TopicSerializers(serializers.ModelSerializer):
@@ -200,7 +214,6 @@ class AgreementSerializers(serializers.ModelSerializer):
     images = SampleSerializers(many=True, read_only=True)
 
     user = serializers.SerializerMethodField()
-    address = serializers.SerializerMethodField()
     comment_nums = serializers.SerializerMethodField()
     message_nums = serializers.SerializerMethodField()
     is_author = serializers.SerializerMethodField()
@@ -249,16 +262,14 @@ class AgreementSerializers(serializers.ModelSerializer):
         user = UserDetailSerializer(obj.user, context={'request': self.context['request']})
         return user.data
 
-    def get_address(self, obj):
-        address = AddressSerializer(obj.address, context={'request': self.context['request']})
-        return address.data
-
     class Meta:
         model = Agreement
         exclude = ('status', )
 
 
 class AgreementCreateSerializers(serializers.ModelSerializer):
+
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Agreement

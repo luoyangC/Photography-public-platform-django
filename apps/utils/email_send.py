@@ -3,15 +3,15 @@
 """
 import random
 
+from django.core.cache import cache
 from django.core.mail import EmailMultiAlternatives
-from user.models import EmailVerifyRecord
 from photography.settings import EMAIL_FROM
 
 __author__ = '骆杨'
 
 
 def send_email(email, send_type='register'):
-    code = make_random_code(email, send_type)
+    code = make_random_code(email)
     if send_type == 'register':
         email_title = 'photography注册激活码'
         text_content = """
@@ -27,7 +27,7 @@ def send_email(email, send_type='register'):
         msg.send()
 
 
-def make_random_code(email, send_type):
+def make_random_code(email):
     code = random.randint(100000, 999999)
-    EmailVerifyRecord.objects.create(code=code, email=email, send_type=send_type)
+    cache.set(email, code, timeout=60 * 5)
     return code

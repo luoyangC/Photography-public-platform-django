@@ -1,5 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import mixins, viewsets, permissions, status
+from rest_framework import mixins, viewsets, status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
@@ -8,7 +8,7 @@ from rest_framework_jwt.settings import api_settings
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from user.models import UserProfile, Address
-from user.serializers import UserCreateSerializer, UserDetailSerializer, EmailVerifySerializer, AddressSerializer
+from user.serializers import UserCreateSerializer, UserDetailSerializer, AddressSerializer, EmailVerifySerializer
 from user.filters import UserFilter
 from utils.email_send import send_email
 from utils.weixin_create import get_weixin_user_info
@@ -46,8 +46,8 @@ class EmailVerifyRecordViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet)
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         email = serializer.validated_data['email']
+
         send_email(email, send_type='register')
         return Response({'email': email}, status=status.HTTP_201_CREATED)
 

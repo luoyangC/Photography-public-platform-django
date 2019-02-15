@@ -1,13 +1,13 @@
 """
   Created by Amor on 2018-11-01
 """
-import datetime
+from django.core.cache import cache
 
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-from user.models import UserProfile, EmailVerifyRecord, Address
+from user.models import UserProfile, Address
 from operate.models import Follow
 
 __author__ = '骆杨'
@@ -31,16 +31,14 @@ class UserCreateSerializer(serializers.ModelSerializer):
                                      validators=[UniqueValidator(queryset=User.objects.all())])
 
     def validate_code(self, code):
-        verify_records = EmailVerifyRecord.objects.filter(email=self.initial_data['email']).order_by('-create_time')
+        verify_records = cache.get(self.initial_data['email'])
         if verify_records:
-            last_record = verify_records[0]
-            five_minutes_age = datetime.datetime.now() - datetime.timedelta(hours=0, minutes=5, seconds=0)
-            if five_minutes_age > last_record.create_time:
-                raise serializers.ValidationError('验证码过期')
-            if last_record.code != code:
+            if verify_records != code:
                 raise serializers.ValidationError('验证码错误')
+            else:
+                return code
         else:
-            raise serializers.ValidationError('验证码错误')
+            raise serializers.ValidationError('验证码过期')
 
     def validate(self, attrs):
         attrs['nick_name'] = attrs['username']
@@ -84,20 +82,24 @@ class UserDetailSerializer(serializers.ModelSerializer):
                   'is_follow', 'follow_nums')
 
 
-class EmailVerifySerializer(serializers.ModelSerializer):
+class EmailVerifySerializer(serializers.Serializer):
 
-    def validate_email(self, email):
-        if User.objects.filter(email=email).count():
-            raise serializers.ValidationError('用户已存在')
-        five_minutes_age = datetime.datetime.now() - datetime.timedelta(hours=0, minutes=5, seconds=0)
+    email = serializers.EmailField()
+    send_type = serializers.CharField()
 
-        if EmailVerifyRecord.objects.filter(create_time__gt=five_minutes_age, email=email):
+    def validate(self, attrs):
+        if attrs['send_type'] == 'register':
+            if User.objects.filter(email=attrs['email']).count():
+                raise serializers.ValidationError('用户已存在')
+        if cache.get('email'):
             raise serializers.ValidationError('距离上次发生不足5分钟，请查看邮件，或稍后再试')
-        return email
+        return attrs
 
-    class Meta:
-        model = EmailVerifyRecord
-        fields = ('email', 'send_type')
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass
 
 
 class AddressSerializer(serializers.ModelSerializer):
