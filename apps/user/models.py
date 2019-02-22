@@ -27,7 +27,8 @@ class UserProfile(AbstractUser, Base):
     mobile = models.CharField(max_length=11, null=True, blank=True, verbose_name='电话')
     email = models.EmailField(max_length=100, null=True, blank=True, verbose_name='邮箱')
     simple_info = models.CharField(max_length=100, null=True, blank=True, verbose_name='简介')
-    image = models.ImageField(default='/image/user/default.png', upload_to='image/user/%Y/%m', verbose_name='头像')
+    image = models.ImageField(default='image/user/default.png', upload_to='image/user/%Y/%m', verbose_name='自定义头像')
+    avatar_url = models.URLField(null=True, blank=True, verbose_name='微信头像')
 
     address = models.OneToOneField('Address', null=True, blank=True, on_delete=models.CASCADE, verbose_name='地址')
 
@@ -53,4 +54,4 @@ class Address(Base):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return '{}-{}-{}'.format(self.province, self.city, self.district)
+        return f'{self.province}-{self.city}-{self.district}'

@@ -1,11 +1,12 @@
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, viewsets, status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.filters import OrderingFilter
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_jwt.settings import api_settings
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from django_filters.rest_framework import DjangoFilterBackend
 
 from user.models import UserProfile, Address
 from user.serializers import UserCreateSerializer, UserDetailSerializer, AddressSerializer, EmailVerifySerializer
@@ -17,12 +18,20 @@ from utils.permissions import IsSelfOrReadOnly
 # Create your views here.
 
 
+class UserPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    page_query_param = 'p'
+    max_page_size = 10
+
+
 class UserViewSet(viewsets.ModelViewSet):
 
     queryset = UserProfile.objects.all()
     serializer_class = UserCreateSerializer
     authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
 
+    pagination_class = UserPagination
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     filter_class = UserFilter
     ordering_fields = ('update_time',)

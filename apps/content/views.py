@@ -1,5 +1,6 @@
 from rest_framework import mixins, viewsets, permissions
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django_filters.rest_framework import DjangoFilterBackend
@@ -13,6 +14,13 @@ from content.filters import ActivityFilter
 from utils.permissions import IsOwnerOrReadOnly
 
 # Create your views here.
+
+
+class ContentPagination(PageNumberPagination):
+    page_size = 5
+    page_size_query_param = 'page_size'
+    page_query_param = 'p'
+    max_page_size = 10
 
 
 class PhotoViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -62,6 +70,7 @@ class ActivityViewSet(viewsets.ModelViewSet):
             return [permissions.IsAuthenticated()]
         return [IsOwnerOrReadOnly()]
 
+    pagination_class = ContentPagination
     queryset = Activity.objects.all().order_by('-update_time')
     authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
 
@@ -82,6 +91,7 @@ class AgreementViewSet(viewsets.ModelViewSet):
             return [permissions.IsAuthenticated()]
         return [IsOwnerOrReadOnly()]
 
+    pagination_class = ContentPagination
     queryset = Agreement.objects.all().order_by('-update_time')
     authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
 

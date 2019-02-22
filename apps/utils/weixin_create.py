@@ -50,7 +50,7 @@ def format_user_info(user_info):
         'username': user_info['openId'],
         'nick_name': user_info['nickName'],
         'gender': user_info['gender'],
-        'image': user_info['avatarUrl'],
+        'avatar_url': user_info['avatarUrl'],
         'password': make_ran_str()
     }
     return data

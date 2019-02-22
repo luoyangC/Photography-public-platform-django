@@ -27,6 +27,7 @@ channels = "*"
 pywin32 = "*"
 channels-redis = "*"
 python-weixin = "*"
+django-aliyun-oss2-storage = "*"
 
 [dev-packages]
 pylint = "*"

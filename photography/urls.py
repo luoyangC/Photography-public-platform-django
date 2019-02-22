@@ -1,7 +1,7 @@
 """
     photography URL Configuration
 """
-import xadmin
+from extra_apps import xadmin
 from django.urls import path, include
 from django.views.static import serve
 from django.views.generic import RedirectView
@@ -9,7 +9,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework.documentation import include_docs_urls
 from rest_framework_jwt.views import obtain_jwt_token
 
-from photography.settings import MEDIA_ROOT
+from settings import MEDIA_ROOT
 from user import views as user_views
 from content import views as content_views
 from operate import views as operate_views
@@ -52,7 +52,7 @@ urlpatterns = [
     # 主页地址
     path('', RedirectView.as_view(url='api/v1/')),
     # 后台管理
-    path('admin/', xadmin.site.urls),
+    path('admin/v1/', xadmin.site.urls),
     # 站点图标
     path('favicon.ico', RedirectView.as_view(url='static/favicon.ico')),
     # 媒体文件
@@ -64,7 +64,7 @@ urlpatterns = [
     # DRF登录
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     # DRF文档
-    path('docs/', include_docs_urls(title='文档')),
+    path('docs/v1/', include_docs_urls(title='文档')),
     # API入口
     path('api/<str:version>/', include(router.urls)),
 ]
