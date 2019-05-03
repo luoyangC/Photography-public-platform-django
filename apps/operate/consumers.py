@@ -36,7 +36,7 @@ def token_get_user(token):
 def get_message(user_id):
     # 通过用户ID获取到用户的未读消息，并返回序列化数据
     messages = Message.objects.filter(to_user_id=user_id, read=False)
-    return WebSocketMessageSerializer(messages, many=True).data
+    return messages
 
 
 def new_message_notify(instance):
@@ -61,15 +61,17 @@ class MessageConsumer(AsyncJsonWebsocketConsumer):
         # 建立WebSocket连接的时候调用该方法
         user = UserProfile.objects.filter(id=self.user['user_id']).first()
         if user:
+            # todo: 消息推送有点问题
             messages = await get_message(user.id)
             await self.accept()
-            await self.send_json(messages)
+            await self.send_json([{'hello': 'word'}])
             cache.set(self.user['user_id'], self.channel_name, timeout=None)
         else:
             await self.close()
 
     async def disconnect(self, close_code):
         # 连接关闭后调用该方法
+        await self.close()
         cache.delete_pattern(self.user['user_id'])
 
     async def push_message(self, event):

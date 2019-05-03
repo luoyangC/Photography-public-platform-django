@@ -103,10 +103,12 @@ class MessageFilter(django_filters.rest_framework.FilterSet):
         if isinstance(current_user, UserProfile):
             agreement = Agreement.objects.filter(id=value).first()
             queryset = queryset.filter(agreement=value)
-            if agreement.user == current_user:
-                return queryset
-            else:
-                return queryset.filter(from_user=current_user)
+            # todo: 需要改一改，逻辑有点问题
+            # if agreement.user == current_user:
+            #     return queryset
+            # else:
+            #     return queryset.filter(from_user=current_user)
+            return queryset
         return queryset.filter(from_user=0)
 
     class Meta:
